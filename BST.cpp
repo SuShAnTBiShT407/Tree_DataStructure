@@ -9,7 +9,7 @@ struct Node
     Node *right;
 };
 
-
+int hd=0;
 // Creates new node in tree
 Node *CreateNewNode(int val){
     Node *new_node = new Node();
@@ -68,7 +68,7 @@ Node *InsertNode(Node *root, int val){
 // Finding the Minimum Node from the tree
 Node *MinimumNode(Node *root){
     Node *node = root;
-    while(node->left!=NULL)
+    while(node->left!=NULL && node)
         node = node->left;
     return node;
 }
@@ -76,7 +76,7 @@ Node *MinimumNode(Node *root){
 // Finding the maximum Node from the tree
 Node *MaximumNode(Node *root){
     Node *node = root;
-    while(node->right!=NULL)
+    while(node->right!=NULL && node)
         node = node->right;
     return node;
 }
@@ -174,14 +174,77 @@ int number_of_nodes_in_tree(Node *node){
     
 }
 void TopView(Node * root){
-    unordered_map<int, vector<int>> map;
-    vector<vector<int>> topview;
-    if(root==NULL)
-        return;
-    else{
-        
+
+    queue<pair<Node*, int>> q;
+    q.push(make_pair(root, 0));
+    int horizontal_distance,l ,r=0;
+    stack<int> left_vals;
+    vector<int> right_vals;
+    Node *node;
+    while(q.size()){
+        node = q.front().first;
+        horizontal_distance = q.front().second;
+        if(horizontal_distance< l){
+            left_vals.push(node->key);
+            l = horizontal_distance;
+        }
+        else if(horizontal_distance> r){
+            right_vals.push_back(node->key);
+            r = horizontal_distance;  
+        }
+        if(node->left){
+            q.push(make_pair(node->left, horizontal_distance-1));
+        }
+        if(node->right){
+            q.push(make_pair(node->right, horizontal_distance+1));
+        }
+        q.pop();
+
+        while(left_vals.size()){
+            cout<< left_vals.top();
+            left_vals.pop();
+        }
+        cout<<root->key<<" ";
+        for (auto x:right_vals){
+            cout<<x << " ";
+        }
+
     }
     
+}
+
+void BotomView(Node *root){
+    
+}
+
+Node *Delete_the_specific_Node(Node *root, int val){
+    if(root==NULL){
+        return root;
+    }
+    if(val < root->key){
+        root->left = Delete_the_specific_Node(root->left, val);
+    }
+    else if(val > root->key){
+        root->right = Delete_the_specific_Node(root->right, val);
+    }
+    else{
+        if(root->left==NULL){
+            Node *temp = root->right;
+            free(root);
+            return temp;
+        }
+        else if(root->right==NULL){
+            Node *temp = root->left;
+            free(root);
+            return temp;
+        }
+        Node *temp = MinimumNode(root->left);
+        root->key = temp->key;
+        root->left = Delete_the_specific_Node(root->right, temp->key);
+
+    }
+
+    return root;
 }
 
 void choices(){
@@ -210,6 +273,13 @@ while(choice!=12){
         cin>>val;
         root = InsertNode(root, val);
     }
+    else if(choice==2){
+        cout<<"\nEnter Value you want to delete : ";
+        int val;;
+        cin>>val;
+        root = Delete_the_specific_Node(root, val);
+        cout<<endl;
+    }
     else if(choice==3){
         cout<<endl;
         inorder(root);
@@ -232,6 +302,9 @@ while(choice!=12){
     else if(choice==6){
         cout<<"Maximum Node : "<<MaximumNode(root)->key<<endl;
         cout<<"Minimum Node : "<<MinimumNode(root)->key<<endl;
+    }
+    else if(choice==8){
+        TopView(root);
     }
     else if (choice==9){
         cout<<endl;
